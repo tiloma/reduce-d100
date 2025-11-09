@@ -2,7 +2,7 @@
   "id": "reduce-d100",
   "title": "Reduce d100 Rolls by 1",
   "description": "Reduziert automatisch alle d100-Würfe um 1.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
