@@ -8,7 +8,7 @@
     "verified": "13"
   },
   "authors": [
-    { "name": "Dein Name" }
+    { "name": "TMT" }
   ],
   "scripts": [
     "scripts/reduce-d100.js"
