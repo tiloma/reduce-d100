@@ -1,31 +1,33 @@
-Hooks.on("preCreateChatMessage", (message, data, options, userId) => {
+// Dieser Hook läuft, wenn Dice So Nice das Ergebnis fertig animiert hat.
+Hooks.on("diceSoNiceRollComplete", (messageId) => {
+  const message = game.messages.get(messageId);
+  if (!message) return;
 
-  // Falls keine Rolls vorhanden sind → ignorieren
-  if (!data.rolls || !Array.isArray(data.rolls)) return;
+  const rolls = message.rolls;
+  if (!rolls) return;
 
-  // Jede Roll in der Nachricht durchgehen
-  data.rolls = data.rolls.map(rollData => {
-    const roll = Roll.fromData(rollData);
+  let changed = false;
 
-    // Alle DiceTerms traversieren
-    roll.terms.forEach(term => {
-      // Nur echte Würfel: 1d100, 2d100 ...
+  // Alle Rolls in dieser Nachricht durchlaufen
+  for (const roll of rolls) {
+    for (const term of roll.terms) {
+      // Wir suchen echte DiceTerms
       if (term instanceof Die && term.faces === 100) {
 
-        term.results = term.results.map(r => {
+        for (const r of term.results) {
           if (typeof r.result === "number") {
-            return {
-              ...r,
-              result: Math.max(0, r.result - 1)
-            };
+            r.result = Math.max(1, r.result - 1);
+            changed = true;
           }
-          return r;
-        });
+        }
       }
+    }
+  }
+
+  // Falls wir Ergebnisse geändert haben → Nachricht aktualisieren
+  if (changed) {
+    message.update({
+      rolls: rolls.map(r => r.toJSON())
     });
-
-    // Roll wieder zurück in JSON
-    return roll.toJSON();
-  });
-
+  }
 });
