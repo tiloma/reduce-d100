@@ -1,33 +1,28 @@
-// Dieser Hook läuft, wenn Dice So Nice das Ergebnis fertig animiert hat.
-Hooks.on("diceSoNiceRollComplete", (messageId) => {
-  const message = game.messages.get(messageId);
-  if (!message) return;
+const MODULE_ID = "reduce-d100";
 
-  const rolls = message.rolls;
-  if (!rolls) return;
+Hooks.once("init", () => {
+  const DieTerm = CONFIG.Dice?.terms?.d;
+  if (!DieTerm) return console.error(`[${MODULE_ID}] Die term not found`);
 
-  let changed = false;
+  // Wrap die.roll so we can post-process *each* d100 result immediately.
+  libWrapper.register(
+    MODULE_ID,
+    "CONFIG.Dice.terms.d.prototype.roll",
+    function (wrapped, ...args) {
+      // Let Foundry roll first
+      const out = wrapped.apply(this, args);
 
-  // Alle Rolls in dieser Nachricht durchlaufen
-  for (const roll of rolls) {
-    for (const term of roll.terms) {
-      // Wir suchen echte DiceTerms
-      if (term instanceof Die && term.faces === 100) {
-
-        for (const r of term.results) {
-          if (typeof r.result === "number") {
+      // Only touch real d100 dice (not d%) and only active results
+      if (this.faces === 100 && Array.isArray(this.results)) {
+        for (const r of this.results) {
+          if (r?.active && typeof r.result === "number") {
+            // reduce by 1, but not below 1
             r.result = Math.max(1, r.result - 1);
-            changed = true;
           }
         }
       }
-    }
-  }
-
-  // Falls wir Ergebnisse geändert haben → Nachricht aktualisieren
-  if (changed) {
-    message.update({
-      rolls: rolls.map(r => r.toJSON())
-    });
-  }
+      return out;
+    },
+    "WRAPPER"
+  );
 });
