@@ -1,21 +1,12 @@
 {
   "id": "reduce-d100",
-  "title": "Reduce d100 Rolls by 1",
-  "description": "Reduziert automatisch alle d100-Würfe um 1.",
-  "version": "1.0.3",
-  "compatibility": {
-    "minimum": "12",
-    "verified": "13"
-  },
-  "authors": [
-    { "name": "TMT" }
-  ],
-  "scripts": [
-    "scripts/reduce-d100.js"
-  ],
-  "esmodules": [],
-  "styles": [],
-  "packs": [],
-  "manifest": "https://raw.githubusercontent.com/tiloma/reduce-d100/main/module.json",
-  "download": "https://github.com/tiloma/reduce-d100/archive/refs/heads/main.zip"
+  "title": "Reduce d100 by 1",
+  "version": "1.0.1",
+  "type": "module",
+  "authors": [{ "name": "tilo" }],
+  "compatibility": { "minimum": "13", "verified": "13" },
+  "esmodules": ["module.js"],
+  "dependencies": [
+    { "name": "lib-wrapper", "type": "module", "manifest": "https://raw.githubusercontent.com/ruipin/fvtt-lib-wrapper/master/module.json" }
+  ]
 }
