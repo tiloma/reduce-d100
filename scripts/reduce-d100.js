@@ -1,33 +1,31 @@
-Hooks.on("preCreateChatMessage", (msg, data, options, userId) => {
-  try {
-    // Prüfen ob die Nachricht überhaupt eine Würfelrolle enthält
-    if (!data.rolls) return;
+Hooks.on("preCreateChatMessage", (message, data, options, userId) => {
 
-    for (let r of data.rolls) {
-      const roll = Roll.fromJSON(r);
+  // Falls keine Rolls vorhanden sind → ignorieren
+  if (!data.rolls || !Array.isArray(data.rolls)) return;
 
-      // Iteriere durch alle Terms
-      roll.terms.forEach(term => {
-        // Nur DiceTerm (z.B. 1d100)
-        if (term instanceof Die && term.faces === 100) {
+  // Jede Roll in der Nachricht durchgehen
+  data.rolls = data.rolls.map(rollData => {
+    const roll = Roll.fromData(rollData);
 
-          // Ergebnisse anpassen
-          term.results = term.results.map(res => {
-            if (typeof res.result === "number") {
-              return {
-                ...res,
-                result: Math.max(1, res.result - 1)  // verhindert 0 oder negatives Ergebnis
-              };
-            }
-            return res;
-          });
-        }
-      });
+    // Alle DiceTerms traversieren
+    roll.terms.forEach(term => {
+      // Nur echte Würfel: 1d100, 2d100 ...
+      if (term instanceof Die && term.faces === 100) {
 
-      // zurückschreiben
-      r = roll.toJSON();
-    }
-  } catch (err) {
-    console.error("reduce-d100 | Fehler beim Verarbeiten des Wurfes:", err);
-  }
+        term.results = term.results.map(r => {
+          if (typeof r.result === "number") {
+            return {
+              ...r,
+              result: Math.max(0, r.result - 1)
+            };
+          }
+          return r;
+        });
+      }
+    });
+
+    // Roll wieder zurück in JSON
+    return roll.toJSON();
+  });
+
 });
